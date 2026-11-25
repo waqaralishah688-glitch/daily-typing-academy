@@ -1,3 +1,4 @@
+
 const passages = {
   easy: "The quick brown fox jumps over the lazy dog.",
   medium: "Learning English typing every day can improve your speed and accuracy.",
@@ -45,6 +46,7 @@ document.querySelectorAll(".level-btn").forEach(button => {
 
 document.getElementById("start").addEventListener("click", () => {
   resetTest();
+
   started = true;
   typing.disabled = false;
   typing.focus();
@@ -52,9 +54,12 @@ document.getElementById("start").addEventListener("click", () => {
   timer = setInterval(() => {
     timeLeft--;
     time.textContent = timeLeft;
+
     updateStats();
 
-    if (timeLeft <= 0) finishTest();
+    if (timeLeft <= 0) {
+      finishTest();
+    }
   }, 1000);
 });
 
@@ -63,20 +68,24 @@ document.getElementById("restart").addEventListener("click", resetTest);
 function updateStats() {
   const typedText = typing.value;
   const targetText = passage.textContent;
+
   let correct = 0;
 
   for (let i = 0; i < typedText.length; i++) {
-    if (typedText[i] === targetText[i]) correct++;
+    if (typedText[i] === targetText[i]) {
+      correct++;
+    }
   }
 
   const elapsed = 60 - timeLeft;
   const minutes = elapsed / 60;
+
   const speed = minutes > 0
     ? Math.round(typedText.length / 5 / minutes)
     : 0;
 
   const accuracyValue = typedText.length > 0
-    ? Math.round(correct / typedText.length * 100)
+    ? Math.round((correct / typedText.length) * 100)
     : 100;
 
   wpm.textContent = speed;
@@ -85,17 +94,24 @@ function updateStats() {
 
 typing.addEventListener("input", () => {
   if (!started) return;
+
   updateStats();
 
-  if (typing.value.length >= passage.textContent.length) {
+  const target = passage.textContent;
+  const typed = typing.value;
+
+  if (typed === target) {
     finishTest();
   }
 });
 
 function finishTest() {
+  if (!started) return;
+
   clearInterval(timer);
   timer = null;
   started = false;
+
   typing.disabled = true;
 
   finalWpm.textContent = wpm.textContent;
