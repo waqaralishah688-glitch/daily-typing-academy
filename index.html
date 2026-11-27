@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,36 +8,51 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <div class="typing-app">
+  <div class="container">
     <h1>Daily Typing Academy</h1>
-    <h2>Improve Your English Typing Skills</h2>
+    <p class="subtitle">Improve Your English Typing Skills</p>
 
-    <div class="levels">
-      <button class="level-btn" data-level="easy">Easy</button>
-      <button class="level-btn" data-level="medium">Medium</button>
-      <button class="level-btn" data-level="hard">Hard</button>
+    <div class="settings">
+      <label for="difficulty">Select Level:</label>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
     </div>
-
-    <p id="passage">The quick brown fox jumps over the lazy dog.</p>
-
-    <textarea id="typing" placeholder="Start typing here..." disabled></textarea>
 
     <div class="stats">
-      <p>Time: <span id="time">60</span></p>
-      <p>WPM: <span id="wpm">0</span></p>
-      <p>Accuracy: <span id="accuracy">100%</span></p>
+      <div class="stat">
+        <span>Time</span>
+        <strong id="timer">60</strong>
+      </div>
+      <div class="stat">
+        <span>WPM</span>
+        <strong id="wpm">0</strong>
+      </div>
+      <div class="stat">
+        <span>CPM</span>
+        <strong id="cpm">0</strong>
+      </div>
+      <div class="stat">
+        <span>Accuracy</span>
+        <strong id="accuracy">100%</strong>
+      </div>
+      <div class="stat">
+        <span>Errors</span>
+        <strong id="errors">0</strong>
+      </div>
     </div>
 
-    <button id="start">Start Test</button>
-    <button id="restart">Restart</button>
+    <div id="passage" class="passage"></div>
 
-    <div class="final-result">
-      <h2>Your Result</h2>
-      <p>WPM: <span id="final-wpm">0</span></p>
-      <p>Accuracy: <span id="final-accuracy">0%</span></p>
-      <p id="performance">Good luck!</p>
-    </div>
+    <textarea id="typingInput"
+      placeholder="Start typing here..."
+      disabled></textarea>
+
+    <button id="restartBtn">Start / Restart Test</button>
+
+    <h2 id="result"></h2>
   </div>
 
   <script src="script.js"></script>
