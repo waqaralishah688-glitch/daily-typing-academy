@@ -1,173 +1,147 @@
 
 const passages = {
-  easy: "Practice makes a person perfect. Keep learning and keep improving your typing skills every day.",
-  medium: "Learning to type faster requires regular practice, patience, and concentration. Try to improve your accuracy every day.",
-  hard: "Consistent practice develops exceptional typing accuracy and speed. Focus on precision, maintain a steady rhythm, and challenge yourself."
+  easy: "I love learning English typing. Practice every day and improve your typing speed. Keep working hard and never give up.",
+  medium: "Typing is an important computer skill. Regular practice helps you improve speed, accuracy and confidence. Try to type every day.",
+  hard: "Technology has transformed communication, education and business. Developing accurate typing skills can improve productivity and create new opportunities."
 };
 
-let selectedLevel = "easy";
+const passageElement = document.getElementById("passage");
+const typingInput = document.getElementById("typingInput");
+const timerElement = document.getElementById("timer");
+const wpmElement = document.getElementById("wpm");
+const cpmElement = document.getElementById("cpm");
+const accuracyElement = document.getElementById("accuracy");
+const errorsElement = document.getElementById("errors");
+const resultElement = document.getElementById("result");
+const difficulty = document.getElementById("difficulty");
+const restartBtn = document.getElementById("restartBtn");
+
+let originalText = "";
 let timeLeft = 60;
 let timer = null;
-let running = false;
+let started = false;
 let finished = false;
 
-const passageElement = document.getElementById("passage");
-const typingInput = document.getElementById("typing");
-const timeElement = document.getElementById("time");
-const wpmElement = document.getElementById("wpm");
-const accuracyElement = document.getElementById("accuracy");
-const startButton = document.getElementById("start");
-const restartButton = document.getElementById("restart");
-const resultElement = document.getElementById("result");
-const finalWpmElement = document.getElementById("final-wpm");
-const finalAccuracyElement = document.getElementById("final-accuracy");
-const performanceElement = document.getElementById("performance");
+function showPassage() {
+  passageElement.innerHTML = "";
 
-let startTime = null;
-
-function loadPassage() {
-  passageElement.textContent = passages[selectedLevel];
-  typingInput.value = "";
-  typingInput.disabled = true;
-  timeLeft = 60;
-  running = false;
-  finished = false;
-  startTime = null;
-
-  clearInterval(timer);
-
-  timeElement.textContent = 60;
-  wpmElement.textContent = 0;
-  accuracyElement.textContent = "100%";
-
-  if (resultElement) resultElement.style.display = "none";
+  originalText.split("").forEach(character => {
+    const span = document.createElement("span");
+    span.textContent = character;
+    passageElement.appendChild(span);
+  });
 }
 
-document.querySelectorAll(".level-btn").forEach(button => {
-  button.addEventListener("click", () => {
-    if (running) return;
-
-    selectedLevel = button.dataset.level;
-
-    document.querySelectorAll(".level-btn").forEach(btn => {
-      btn.classList.remove("active");
-    });
-
-    button.classList.add("active");
-    loadPassage();
-  });
-});
-
 function startTest() {
-  if (running) return;
+  clearInterval(timer);
 
-  loadPassage();
-
-  running = true;
+  originalText = passages[difficulty.value];
+  timeLeft = 60;
+  started = false;
   finished = false;
-  startTime = Date.now();
 
+  typingInput.value = "";
   typingInput.disabled = false;
   typingInput.focus();
 
-  timer = setInterval(() => {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    timeLeft = Math.max(0, 60 - elapsed);
-    timeElement.textContent = timeLeft;
+  timerElement.textContent = 60;
+  wpmElement.textContent = 0;
+  cpmElement.textContent = 0;
+  accuracyElement.textContent = "100%";
+  errorsElement.textContent = 0;
+  resultElement.textContent = "";
 
-    updateStats();
-
-    if (timeLeft <= 0) {
-      finishTest();
-    }
-  }, 250);
+  showPassage();
 }
 
 function updateStats() {
   const typed = typingInput.value;
-  const target = passageElement.textContent;
+  const spans = passageElement.querySelectorAll("span");
 
-  let correct = 0;
+  let correctCharacters = 0;
+  let errors = 0;
 
-  for (let i = 0; i < typed.length; i++) {
-    if (typed[i] === target[i]) correct++;
-  }
+  typed.split("").forEach((character, index) => {
+    if (character === originalText[index]) {
+      correctCharacters++;
+    } else {
+      errors++;
+    }
+  });
 
-  const accuracy = typed.length === 0
-    ? 100
-    : Math.round((correct / typed.length) * 100);
+  spans.forEach((span, index) => {
+    span.className = "";
 
-  const elapsedMinutes = Math.max(
-    (Date.now() - startTime) / 60000,
-    1 / 60
-  );
+    if (index < typed.length) {
+      if (typed[index] === originalText[index]) {
+        span.classList.add("correct");
+      } else {
+        span.classList.add("incorrect");
+      }
+    }
+  });
 
-  const words = typed.trim().length === 0
-    ? 0
-    : typed.trim().split(/\s+/).length;
+  const elapsed = 60 - timeLeft;
+  const minutes = elapsed / 60;
 
-  const wpm = Math.round(words / elapsedMinutes);
+  const wpm = minutes > 0
+    ? Math.round((correctCharacters / 5) / minutes)
+    : 0;
+
+  const cpm = minutes > 0
+    ? Math.round(correctCharacters / minutes)
+    : 0;
+
+  const accuracy = typed.length > 0
+    ? Math.round((correctCharacters / typed.length) * 100)
+    : 100;
 
   wpmElement.textContent = wpm;
+  cpmElement.textContent = cpm;
   accuracyElement.textContent = accuracy + "%";
+  errorsElement.textContent = errors;
 
-  return { wpm, accuracy };
+  if (typed.length >= originalText.length) {
+    finishTest();
+  }
 }
 
 function finishTest() {
   if (finished) return;
 
   finished = true;
-  running = false;
-
   clearInterval(timer);
-
   typingInput.disabled = true;
 
-  const stats = updateStats();
-
-  if (finalWpmElement) {
-    finalWpmElement.textContent = stats.wpm;
-  }
-
-  if (finalAccuracyElement) {
-    finalAccuracyElement.textContent = stats.accuracy + "%";
-  }
-
-  if (performanceElement) {
-    if (stats.accuracy >= 90) {
-      performanceElement.textContent = "Excellent! Great work!";
-    } else if (stats.accuracy >= 70) {
-      performanceElement.textContent = "Good job! Keep practicing!";
-    } else {
-      performanceElement.textContent = "Keep practicing. You can improve!";
-    }
-  }
-
-  if (resultElement) {
-    resultElement.style.display = "block";
-    resultElement.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
-  }
+  resultElement.textContent =
+    "Test Completed! WPM: " + wpmElement.textContent +
+    " | CPM: " + cpmElement.textContent +
+    " | Accuracy: " + accuracyElement.textContent +
+    " | Errors: " + errorsElement.textContent;
 }
 
 typingInput.addEventListener("input", () => {
-  if (!running || finished) return;
+  if (finished) return;
 
-  const target = passageElement.textContent;
-  const typed = typingInput.value;
+  if (!started && typingInput.value.length > 0) {
+    started = true;
+
+    timer = setInterval(() => {
+      timeLeft--;
+      timerElement.textContent = timeLeft;
+
+      updateStats();
+
+      if (timeLeft <= 0) {
+        finishTest();
+      }
+    }, 1000);
+  }
 
   updateStats();
-
-  // Passage complete hote hi timer rok kar result dikhao
-  if (typed === target) {
-    finishTest();
-  }
 });
 
-startButton.addEventListener("click", startTest);
-restartButton.addEventListener("click", startTest);
+restartBtn.addEventListener("click", startTest);
+difficulty.addEventListener("change", startTest);
 
-loadPassage();
+startTest();
